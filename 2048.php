@@ -7,14 +7,12 @@
 			var cell = 4;
 			var gameover = false;
 			var tiles = new Array(row);
+			var score = 0;
 
 			for (var i=0;i<cell;i++){
 				tiles[i] = new Array(cell);
 			}
-			var temp = new Array(row);
-			for (var i=0;i<cell;i++){
-				temp[i] = new Array(cell);
-			}
+
 
 			function spawn(){
 				var availableRow = [];
@@ -27,11 +25,8 @@
 						}
 					}
 				}
+				if(availableRow.length==0&& availableCell.length==0)return;
 				var rand = Math.floor(Math.random()*availableRow.length);
-				//var randrow = Math.floor(Math.random()*availableRow.length);
-				//var randcell = Math.floor(Math.random()*availableCell.length);
-				//console.log("this "+availableRow[randrow]+" row "+randrow);
-				//console.log("this "+availableCell[randrow]+" cell "+randcell);
 				tiles[availableRow[rand]][availableCell[rand]]=Math.floor(Math.random()*2)?2:4;
 			}
 
@@ -39,6 +34,8 @@
 				//tiles[1][1]=2;
 				//tiles[3][2]=124;
 				$(".grid").empty();
+				$(".score").empty();
+				$(".score").text(score);
 
 				for(var i=0;i<row;i++){
 					//var number=0;
@@ -80,54 +77,104 @@
 						tiles[i][y] = 0;
 					}
 				}
-				//spawn();
-				//spawn();
-				slide(-1,0);
+				spawn();
+				spawn();
+				//slide(1,0);
 				
-
+				start();
+				
 			});
 
 			$(document).keydown(function(e){
-				console.log(e.keyCode);
-				if(e.keyCode==39){
-					//right
-				}else if(e.keyCode==37){
-					//left
-				}else if(e.keyCode==38){
-					//up
-				}else if(e.keyCode==40){
-					//down
+				var drow =0;
+				var dcell =0;
+				var gameover = true;
+				var dxs = [0,0,-1,1];
+				var dys = [-1,1,0,0];
+				for(var i = 0; i<4;i++ ){
+					if(move(dys[i],dxs[i],true)!=null)
+						gameover = false;
 				}
+				if(gameover==false){
+					if(e.keyCode==39){
+						//right
+						dcell=1;
+					}else if(e.keyCode==37){
+						//left
+						dcell=-1;
+					}else if(e.keyCode==38){
+						//up
+						drow=-1;
+					}else if(e.keyCode==40){
+						//down
+						drow=1;
+					}else{
+						return;
+					}
+					 
+					 var check = move(drow,dcell);
+					 if(check != null){
+					 	tiles = check;
+					 	spawn();
+					 }	
+				}
+				if(gameover)alert("gameover");
+				start();
+				 
 			});
 
-			function slide(drow,dcell){
-				if(drow!=0||dcell!=0){
-					var direction = drow == 0?dcell:drow;
-					//console.log(direction);
-					for(var i = 0;i<row;i++){
-						for(var y = 0;y<cell;y++){
-							temp[i][y] = tiles[i][y];
-						}
+			function move(dy,dx,check){
+				var temp = new Array(row);
+				for (var i=0;i<cell;i++){
+					temp[i] = new Array(cell);
+				}
+
+				for(var i = 0; i < row;i++){
+					for(var y = 0;y <cell;y++){
+						temp [i][y] = tiles[i][y];
 					}
-					//always check from opposite direction
-					for(var i =0;i<row;i++){
-						for(var y = direction > 0?0:cell-1;y != (direction>0?cell:-1);y += direction){
-							//alert(y);
-							var switcherA = drow == 0?i:y;
-							var switcherB = drow == 0?y:i;
-							//console.log(switcherA);
-							console.log(y);
-							//if(tiles[switcherA][switcherB] == 0 ) continue;
-							tiles[switcherA][switcherB] = 2;
+				}
+				var moved = false;
+				if( dy !=0|| dx !=0){
+					var direction = dx != 0 ? dx : dy;
+					for(var i =0;i<tiles.length;i++){
+						for(var j = (direction > 0 ?tiles.length-1 : 1); j != (direction > 0 ?-1:tiles.length); j -=direction){
+							var y = dx != 0?i:j;
+							var x = dx != 0?j:i;
+							var ty = y;
+							var tx = x;
+							if(temp[y][x]==0) continue;
 
+							for(var k= (dx !=0?x:y)+direction; k!= (direction>0?tiles.length:-1);k +=direction){
+								var a = dx != 0? y : k;
+								var b = dx != 0? k : x;
+								if(temp[a][b] != 0 && temp[a][b] != tiles[y][x]) break;
+								if(dx != 0)
+									tx = k;
+								else
+									ty = k;
+							}
 
-											start();
-							alert("hey");		
+							if((dy !=0 && ty==y)||(dx!=0 && tx==x))continue;
+							else if(temp[ty][tx]==tiles[y][x]){
+								temp[ty][tx]*=2;
+								temp[y][x]=0;
+								if(!check)
+								score += temp[ty][tx];
+								moved = true;
+							}else if((dy!=0 && ty!=y)||(dx!=0&&tx!=x)){
+								temp[ty][tx]=temp[y][x];
+								temp[y][x]=0;
+								moved = true;
+							}
 
 						}
 					}
 				}
+				return moved?temp:null;
 			}
+				
+			
 		</script>
 	</head>
 	<body>
@@ -135,30 +182,6 @@
 			<label>SCORE:</label>
 			<label class="score">0</label>
 			<div class="grid">
-				<!--div class="row">
-					<div class="cell"></div>
-					<div class="cell"></div>
-					<div class="cell"> </div>
-					<div class="cell"> </div>
-				</div>
-				<div class="row">
-					<div class="cell"> </div>
-					<div class="cell"> </div>
-					<div class="cell"> </div>
-					<div class="cell"> </div>
-				</div>
-				<div class="row">
-					<div class="cell"> </div>
-					<div class="cell"> </div>
-					<div class="cell"> </div>
-					<div class="cell"> </div>
-				</div>
-				<div class="row">
-					<div class="cell"> </div>
-					<div class="cell"> </div>
-					<div class="cell"> </div>
-					<div class="cell"> </div>
-				</div-->
 			</div>
 		</div>
 	</body>
