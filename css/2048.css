@@ -35,7 +35,9 @@ body{
 }
 button{
 	border-radius:5px;
-	border:0px solid #000000;
+	border:1px solid #bd9d9d;
+	font-weight: bold;
 	padding: 10px 30px 10px 30px;
 	margin: 5px;
+	background-color: rosybrown;
 }

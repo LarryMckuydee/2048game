@@ -70,7 +70,7 @@
 				}
 
 				if(gameover){
-					$("<div></div>").css({
+					$("<div class='gameover'></div>").css({
 						"position":"absolute",
 						"width":"inherit",
 						"height":"inherit",
@@ -91,8 +91,9 @@
 						"text-align":"center",
 						"vertical-align":"middle",
 						"font-size":"3em"
-					})).appendTo($(".grid"));
+					})).appendTo($(".grid")).hide();
 
+					$('.gameover').fadeIn(300);
 					$('.newgame').click(function(){
 						location.reload();
 					});
